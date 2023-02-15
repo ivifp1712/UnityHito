@@ -9,29 +9,43 @@ public class LogicaPersonaje : MonoBehaviour
     private Animator anim;
     public float x,y;
 
+    public float speedH = 2.0f;
+    public float speedV = 2.0f;
 
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+
+    // Disparar
+    public GameObject BalaInicio;
+    public GameObject BalaPrefab;
+    public float BalaVelocidad;
     public float force = 150;
-    // Start is called before the first frame update
+
+    public float timeBetweenShots = 0.5f;
+    private float timeSinceLastShot;
+
+
     void Start()
     {
         anim = GetComponent<Animator>();
+        timeSinceLastShot = timeBetweenShots;
+
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // float h = Input.GetAxis("Horizontal");
-        // float v = Input.GetAxis("Vertical");
-
-        // Vector3 movement = new Vector3(h, 0.5f, v);
-
-        // rb.AddForce(movement * force * Time.deltaTime);
 
         x = Input.GetAxis("Horizontal");
         y = Input.GetAxis("Vertical");
 
-        transform.Rotate(0, x * velocidadRotacion * Time.deltaTime, 0);
         transform.Translate(0, 0, y * velocidadMovimiento * Time.deltaTime);
+        transform.Translate(x * velocidadMovimiento * Time.deltaTime, 0, 0);
+
+        // transform.Translate(0, x * velocidadRotacion * Time.deltaTime, 0);
+        // transform.Translate(0, 0, y * velocidadMovimiento * Time.deltaTime);
+
+        // Mover personaje arriba, abajo, derecha, izquierda
+
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -42,7 +56,25 @@ public class LogicaPersonaje : MonoBehaviour
             anim.SetBool("correr", false);
         }
 
-
+        if(Input.GetButton("Fire1")){
+            if(timeSinceLastShot >= timeBetweenShots){
+                    //1-Instanciar la BalaPrefab en las posiciones de BalaInicio
+                    GameObject BalaTemporal = Instantiate(BalaPrefab, BalaInicio.transform.position, BalaInicio.transform.rotation) as GameObject;
+        
+                    //Obtener Rigidbody para agregar Fuerza. 
+                    Rigidbody rb = BalaTemporal.GetComponent<Rigidbody>();
+            
+                    //Agregar la fuerza a la Bala
+                    rb.AddForce(transform.forward * BalaVelocidad);
+        
+                    //Debemos Destruir la bala
+                    Destroy(BalaTemporal, 5.0f);
+                    //bulletObject.transform.position = transform.position + transform.forward;
+                    timeSinceLastShot = 0f;
+            }
+        }
+        timeSinceLastShot += Time.deltaTime;
+        
 
     }
 }
